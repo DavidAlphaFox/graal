@@ -50,7 +50,7 @@ class JNIRegistrationJavaNet extends JNIRegistrationUtil implements InternalFeat
     public void duringSetup(DuringSetupAccess a) {
         /* jdk.net.ExtendedSocketOptions is only available if the jdk.net module is loaded. */
         this.hasPlatformSocketOptions = a.findClassByName("jdk.net.ExtendedSocketOptions$PlatformSocketOptions") != null;
-        initializeAtRunTime(a, "java.net.DatagramPacket", "java.net.InetAddress", "java.net.NetworkInterface",
+        initializeAtRunTime(a, "java.net.DatagramPacket", "java.net.InetAddress", "java.net.Inet4Address", "java.net.Inet6Address", "java.net.NetworkInterface",
                         /* Stores a default SSLContext in a static field. */
                         "javax.net.ssl.SSLContext");
 

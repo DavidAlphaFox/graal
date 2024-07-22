@@ -30,7 +30,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import jdk.graal.compiler.serviceprovider.JavaVersionUtil;
 import org.graalvm.nativeimage.Platforms;
 import org.graalvm.nativeimage.hosted.RuntimeJNIAccess;
 import org.graalvm.nativeimage.impl.InternalPlatform;
@@ -40,6 +39,8 @@ import com.oracle.svm.core.feature.InternalFeature;
 import com.oracle.svm.core.jdk.JNIRegistrationUtil;
 import com.oracle.svm.core.jdk.PlatformNativeLibrarySupport;
 import com.oracle.svm.hosted.FeatureImpl;
+
+import jdk.graal.compiler.serviceprovider.JavaVersionUtil;
 
 /**
  * Registration of classes, methods, and fields accessed via JNI by C code of the JDK.
