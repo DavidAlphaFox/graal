@@ -92,6 +92,17 @@ import jdk.vm.ci.meta.UnresolvedJavaType;
 @FromLibGraalEntryPointsResolver(value = TruffleFromLibGraal.Id.class, entryPointsClassName = "com.oracle.truffle.runtime.hotspot.libgraal.TruffleFromLibGraalEntryPoints")
 final class HSTruffleCompilerRuntime extends HSObject implements TruffleCompilerRuntime {
 
+    private static final Class<?> TRANSLATED_EXCEPTION;
+    static {
+        Class<?> clz;
+        try {
+            clz = Class.forName("jdk.internal.vm.TranslatedException");
+        } catch (ClassNotFoundException cnf) {
+            clz = null;
+        }
+        TRANSLATED_EXCEPTION = clz;
+    }
+
     private final ResolvedJavaType classLoaderDelegate;
     final TruffleFromLibGraalCalls calls;
 
@@ -209,7 +220,20 @@ final class HSTruffleCompilerRuntime extends HSObject implements TruffleCompiler
     @Override
     public ResolvedJavaType resolveType(MetaAccessProvider metaAccess, String className, boolean required) {
         String internalName = getInternalName(className);
-        JavaType jt = runtime().lookupType(internalName, (HotSpotResolvedObjectType) classLoaderDelegate, required);
+        JavaType jt;
+        try {
+            jt = runtime().lookupType(internalName, (HotSpotResolvedObjectType) classLoaderDelegate, required);
+        } catch (Exception e) {
+            if (TRANSLATED_EXCEPTION != null && TRANSLATED_EXCEPTION.isInstance(e) && e.getCause() instanceof LinkageError) {
+                /*
+                 * Starting from JDK24, we wrap the NoClassDefFoundError with TranslatedException.
+                 * This is a checked exception and cannot be caught directly without an explicit
+                 * throw statement or throws declaration. See JDK-8335553
+                 */
+                throw (LinkageError) e.getCause();
+            }
+            throw e;
+        }
         if (jt instanceof UnresolvedJavaType) {
             if (required) {
                 throw new NoClassDefFoundError(internalName);
